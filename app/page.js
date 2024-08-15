@@ -13,6 +13,7 @@ import {
   collection,
   query,
   getDocs,
+  getDoc,
   deleteDoc,
   setDoc,
   doc,
@@ -27,6 +28,7 @@ export default function Home() {
     const snapshot = query(collection(firestore, "inventory"));
     const docs = await getDocs(snapshot);
     const inventoryList = [];
+
     docs.forEach((doc) => {
       inventoryList.push({
         id: doc.id,
@@ -37,7 +39,7 @@ export default function Home() {
   };
 
   const addItem = async (id) => {
-    const docRef = doc(collection(firestore, "inventory"), item);
+    const docRef = doc(collection(firestore, "inventory"), id);
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
@@ -50,7 +52,7 @@ export default function Home() {
     await updateInventory();
   };
   const removeItem = async (id) => {
-    const docRef = doc(collection(firestore, "inventory"), item);
+    const docRef = doc(collection(firestore, "inventory"), id);
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
@@ -122,7 +124,6 @@ export default function Home() {
           </Stack>
         </Box>
       </Modal>
-      {/* <Typography variant="h1">Inventory Management</Typography> */}
       <Button
         variant="contained"
         onClick={() => {
@@ -132,7 +133,7 @@ export default function Home() {
         Add New Item
       </Button>
       <Box border="1px solid black">
-        <Box width={"800px"} height={"100px"} bgcolor="#ADD8E6">
+        <Box width="800px" height="100px" bgcolor="#ADD8E6">
           <Typography
             variant="h2"
             color="#333"
@@ -143,23 +144,37 @@ export default function Home() {
             Inventory Item
           </Typography>
         </Box>
+        <Stack width="800px" height="300px" spacing={2} overflow="auto">
+          {console.log(inventory)}
+          {inventory.map(({ id, quantity }) => (
+            <Box
+              key={id}
+              width="100%"
+              minHeight="150px"
+              display="flex"
+              alignItems="center"
+              justifyContent="space-between"
+              // bgcolor="#f0f0f0"
+              padding={5}
+            >
+              <Typography variant="h3" color="#333" textAlign="center">
+                {id.charAt(0).toUpperCase() + id.slice(1)}
+              </Typography>
+              <Typography variant="h3" color="#333" textAlign="center">
+                {quantity}
+              </Typography>
+              <Button
+                variant="contained"
+                onClick={() => {
+                  removeItem(id);
+                }}
+              >
+                Remove Item
+              </Button>
+            </Box>
+          ))}
+        </Stack>
       </Box>
-      <Stack width="800px" height="300px" spacing={2} overflow={"auto"}>
-        {inventory.map(({ name, quantity }) => (
-          <Box
-            key={name}
-            width="100%"
-            minHeight="150px"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            bgcolor="#f0f0f0"
-            padding={5}
-          >
-            <Typography>{name}</Typography>
-          </Box>
-        ))}
-      </Stack>
     </Box>
   );
 }
