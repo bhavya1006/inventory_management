@@ -9,6 +9,8 @@ import {
   Typography,
   Button,
   Container,
+  Autocomplete,
+  FormControl,
 } from "@mui/material";
 import {
   collection,
@@ -24,6 +26,7 @@ export default function Home() {
   const [inventory, setInventory] = useState([]);
   const [open, setOpen] = useState(false);
   const [itemName, setItemName] = useState("");
+  const  [search, setSearch] = useState("");
 
   const updateInventory = async () => {
     const snapshot = query(collection(firestore, "inventory"));
@@ -77,8 +80,10 @@ export default function Home() {
 
   return (
     <>
-      <Box bgcolor="primary.main" color="primary.contrastText" p={2}>
+      <Box bgcolor="#333">
         <Container>
+
+          {/* Main */}
           <Box
             height="100vh"
             display="flex"
@@ -86,7 +91,9 @@ export default function Home() {
             flexDirection="column"
             alignItems="center"
             gap={2}
+            bgcolor="#e0e0e0"
           >
+            {/* Open Menu */}
             <Modal open={open} onClose={handleClose}>
               <Box
                 position="absolute"
@@ -127,6 +134,8 @@ export default function Home() {
                 </Stack>
               </Box>
             </Modal>
+
+            {/* Button to Aceess Add Item */}
             <Button
               variant="contained"
               onClick={() => {
@@ -135,7 +144,10 @@ export default function Home() {
             >
               Add New Item
             </Button>
-            <Box border="1px solid black" sx={{ display: {} }}>
+
+            {/* Display Inventory Item */}
+            <Box border="1px solid black">
+              {/* Title */}
               <Box width="800px" height="100px" bgcolor="#ADD8E6">
                 <Typography
                   variant="h2"
@@ -147,48 +159,112 @@ export default function Home() {
                   Inventory Item
                 </Typography>
               </Box>
-              <Stack width="800px" height="300px" spacing={2} overflow="auto">
+
+              {/* Search filter */}
+              <Box alignItems="center" width="100%" display="flex" justifyContent='center'>
+                {/* <Autocomplete
+                freeSolo
+                id="boxes"
+                disableClearable
+                options={inventory.map((option) => option.id)}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Search input"
+                    InputProps={{
+                      ...params.InputProps,
+                      type: "search",
+                    }}
+                  />
+                )}
+                /> */}
+                <FormControl sx={{ m: 1, width: "75ch" }} variant="outlined" >
+                  <TextField
+                    id="filled-basic"
+                    label="Search"
+                    variant="filled"
+                    value={search}
+
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search Item"
+                  />
+                </FormControl>
+              </Box>
+
+              {/* Items Stack */}
+              <Stack width="800px" height="300px" spacing={1} overflow="auto">
                 {console.log(inventory)}
-                {inventory.map(({ id, quantity }) => (
+                {inventory.filter((item)=>{
+                  return search.toLowerCase() === "" ? item:item.id.toLowerCase().includes(search.toLowerCase())
+                }).map(({ id, quantity }) => (
                   <Box
                     key={id}
                     width="100%"
-                    minHeight="150px"
+                    // minHeight="150px"
                     display="flex"
                     alignItems="center"
                     justifyContent="space-between"
                     // bgcolor="#f0f0f0"
-                    padding={5}
+                    padding={2}
                   >
-                    <Typography variant="h3" color="#333" textAlign="center">
+                    {/* DataSet Value */}
+                    <Typography variant="h6" color="#333" textAlign="center">
                       {id.charAt(0).toUpperCase() + id.slice(1)}
                     </Typography>
-                    <Typography variant="h3" color="#333" textAlign="center">
-                      {quantity}
-                    </Typography>
-                    <Stack direction="row" spacing={2}>
-                      <Button
-                        variant="contained"
-                        onClick={() => {
-                          addItem(id);
-                        }}
-                      >
-                        + Add
-                      </Button>
-                      <Button
-                        variant="contained"
-                        onClick={() => {
-                          removeItem(id);
-                        }}
-                      >
-                        - Remove
-                      </Button>
-                    </Stack>
+
+                    <Box width='50%' display='flex' flexDirection='row' justifyContent='space-between' alignItems='center'>
+                      <Typography color="#333" textAlign="center">
+                        x {quantity}
+                      </Typography>
+                      {/* Add or Remove Button */}
+                      <Stack direction="row" spacing={1}>
+                        <Button
+                          variant="contained"
+                          onClick={() => {
+                            addItem(id);
+                          }}
+                        >
+                          + Add
+                        </Button>
+                        <Button
+                          variant="contained"
+                          onClick={() => {
+                            removeItem(id);
+                          }}
+                        >
+                          - Remove
+                        </Button>
+                      </Stack>
+                    </Box>
                   </Box>
                 ))}
               </Stack>
             </Box>
+
+            {/* Inventory Summary */}
+            <Box
+              width="800px"
+              display="flex"
+              flexDirection="column"
+              alignItems="center"
+              gap={1}
+              bgcolor="#ADD8E6"
+              padding={1}
+            >
+              <Typography variant="h6" color="#333">
+                Inventory Summary:
+              </Typography>
+              <Typography color="#333">
+                Total Items: {inventory.length}
+              </Typography>
+              <Typography color="#333">
+                Total Quantity:{" "}
+                {inventory.reduce((acc, item) => acc + item.quantity, 0)}
+              </Typography>
+            </Box>
+
           </Box>
+          
         </Container>
       </Box>
     </>
